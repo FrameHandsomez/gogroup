@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model location2 {
+  Id           Int      @id @default(autoincrement())
+  start        String   @db.VarChar(200)
+  end          String   @db.VarChar(100)
+  datetime     DateTime
+  personSelect String   @db.VarChar(100)
+  introduction String?  @db.VarChar(100)
+  statusId     Int      @default(1)
+  cusId        Int?
+  driverId     Int?
+  fare         Float?
+  cus          user?    @relation("CustomerLocations", fields: [cusId], references: [Id])
+  driver       user?    @relation("DriverLocations", fields: [driverId], references: [Id])
+  status       orderstatus @relation(fields: [statusId], references: [id])
+
+  @@index([cusId], map: "location2_cusId_fkey")
+  @@index([driverId], map: "location2_driverId_fkey")
+}
+
+model user {
+  Id           Int           @id @default(autoincrement())
+  Email        String        @db.VarChar(200)
+  Password     String        @db.VarChar(100)
+  Name         String        @db.VarChar(100)
+  UserType     user_UserType
+  Phone        String?
+  customerLocs location2[]   @relation("CustomerLocations")
+  driverLocs   location2[]   @relation("DriverLocations")
+}
+
+model orderstatus {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  location2 location2[] // Define reverse relation
+}
+
+enum user_UserType {
+  Driver
+  Customer
+}
